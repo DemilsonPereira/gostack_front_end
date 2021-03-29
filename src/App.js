@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from './services/api.js'
 
 import './App.css';
@@ -6,23 +6,34 @@ import './App.css';
 import Header from "./components/Header";
 
 function App() {
-  const [projects, setProjects] = useState([
-    "Desenvolvimento de app",
-    "Front-end web",
-  ]);
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+      api.get('projects').then(response => {
+          setProjects(response.data);
+      });
+  }, []);
 
   // useState retorna um array com 2 posições
   //
   // 1. Variável com o seu valor inicial ["Desenvolvimento de app", "Front-end web"]
   // 2. Função para atualizarmos esse valor
 
-  function handleAddProject() {
+  async function handleAddProject() {
     //   projects.push(`Novo projeto ${Date.now()}`);
 
     // IMUTABILIDADE
-    setProjects([...projects, `Novo projeto ${Date.now()}`]);
+    // setProjects([...projects, `Novo projeto ${Date.now()}`]);
 
-    console.log(projects);
+    const response = await api.post('projects', {
+        title: `Novo projeto ${Date.now()}`,
+        owner: "Demilson Pereira"
+    })
+
+    const project = response.data;
+
+    setProjects([...projects, project])
+
   }
 
   return (
@@ -31,7 +42,7 @@ function App() {
 
       <ul>
         {projects.map((project) => (
-          <li key={project}>{project}</li>
+          <li key={project.id}>{project.title}</li>
         ))}
       </ul>
 
